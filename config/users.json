@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "name": "System Admin",
+    "email": "admin@productsphere.com",
+    "password": "adminpassword",
+    "role": "admin",
+    "phone": "03001234567",
+    "gender": "male",
+    "status": "approved",
+    "license_no": null,
+    "business_address": null
+  },
+  {
+    "id": 2,
+    "name": "Wholesaler User",
+    "email": "wholesaler@productsphere.com",
+    "password": "wholesalerpassword",
+    "role": "wholesaler",
+    "phone": "03007654321",
+    "gender": "male",
+    "status": "approved",
+    "license_no": "TX-998827-B",
+    "business_address": "Karkhana Bazar, Faisalabad, Punjab"
+  },
+  {
+    "id": 3,
+    "name": "Buyer User",
+    "email": "buyer@productsphere.com",
+    "password": "buyerpassword",
+    "role": "buyer",
+    "phone": "03211234567",
+    "gender": "female",
+    "status": "approved",
+    "license_no": null,
+    "business_address": null
+  },
+  {
+    "id": 4,
+    "name": "Test",
+    "phone": "1234567890",
+    "gender": "male",
+    "email": "abc@abc.com",
+    "password": "$2b$10$BH9ENMIYSI7BrBOVmH4s8ur24Oj0DMWoiqQaCoiNTgwh18OjUhQO2",
+    "role": "wholesaler",
+    "status": "approved",
+    "license_no": "12345",
+    "business_address": "12345"
+  },
+  {
+    "id": 5,
+    "name": "Test",
+    "phone": "1234567890",
+    "gender": "male",
+    "email": "abc@xyz.com",
+    "password": "$2b$10$zreyitK8J0nFX8d..etNBuOx40/hHrrsgOYQD7DGa/YVrImpAvgTq",
+    "role": "wholesaler",
+    "status": "approved",
+    "license_no": "12345",
+    "business_address": "12345"
+  }
+]
