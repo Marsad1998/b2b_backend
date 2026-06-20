@@ -6,11 +6,13 @@ const {
   updateBusinessStatus,
   getAllProducts,
   deleteProduct,
-  updateProductStatus
+  updateProductStatus,
+  getApprovedWholesalers
 } = require("../controllers/adminController");
 
 router.get("/pending-wholesalers", authMiddleware, getPendingWholesalers);
 router.post("/update-status", authMiddleware, updateBusinessStatus);
+router.get("/wholesalers", authMiddleware, getApprovedWholesalers);
 
 router.get("/products", authMiddleware, getAllProducts);
 router.delete("/products/:id", authMiddleware, deleteProduct);

@@ -60,3 +60,26 @@ INSERT INTO `products` (`id`, `name`, `description`, `price`, `original_price`, 
 (2, 'Premium Leather Sports Shoes (50 Pairs)', 'High durability premium sports shoes, perfect for running and outdoor sports.', 40000.00, 60000.00, 50, 'Shoes', 2, 'Wholesaler User', 'active'),
 (3, 'Natural Rose Perfume Pack (30 Bottles)', 'Organic sweet rose scent perfume bottles. Premium packaging for gift shops.', 12000.00, 18000.00, 30, 'Perfumes', 2, 'Wholesaler User', 'active')
 ON DUPLICATE KEY UPDATE id=id;
+
+-- --------------------------------------------------------
+-- Table structure for table `categories`
+-- --------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `categories` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(255) UNIQUE NOT NULL,
+  `description` TEXT,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+-- Dumping data for table `categories`
+-- --------------------------------------------------------
+
+INSERT INTO `categories` (`id`, `name`, `description`) VALUES
+(1, 'Clothing', 'Apparel, garments, and outfits'),
+(2, 'Shoes', 'Footwear, sports shoes, and formal shoes'),
+(3, 'Perfumes', 'Fragrances, scents, and body sprays'),
+(4, 'Electronics', 'Gadgets, appliances, and accessories'),
+(5, 'Groceries', 'Daily essentials and food items')
+ON DUPLICATE KEY UPDATE id=id;

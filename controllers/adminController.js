@@ -125,10 +125,28 @@ const updateProductStatus = async (req, res) => {
   }
 };
 
+const getApprovedWholesalers = async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Unauthorized. Admin privileges required." });
+    }
+
+    const wholesalers = await UserModel.findApprovedWholesalers();
+    return res.status(200).json({
+      success: true,
+      data: wholesalers
+    });
+  } catch (err) {
+    console.error("getApprovedWholesalers error:", err);
+    return res.status(500).json({ success: false, message: "Server error retrieving approved wholesalers" });
+  }
+};
+
 module.exports = {
   getPendingWholesalers,
   updateBusinessStatus,
   getAllProducts,
   deleteProduct,
-  updateProductStatus
+  updateProductStatus,
+  getApprovedWholesalers
 };

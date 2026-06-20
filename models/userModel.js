@@ -47,9 +47,19 @@ const updateUserStatus = async (id, status) => {
   return result.affectedRows > 0;
 };
 
+// Find wholesalers that are already verified and approved
+const findApprovedWholesalers = async () => {
+  const [rows] = await db.query(
+    `SELECT id, name, email FROM users WHERE role = ? AND status = ?`,
+    ['wholesaler', 'approved']
+  );
+  return rows;
+};
+
 module.exports = {
   findByEmail,
   createUser,
   findPendingWholesalers,
-  updateUserStatus
+  updateUserStatus,
+  findApprovedWholesalers
 };

@@ -45,9 +45,37 @@ const updateProductStatus = async (id, status) => {
   return result.affectedRows > 0;
 };
 
+// Get products by wholesaler ID
+const getProductsByWholesaler = async (wholesalerId) => {
+  const [rows] = await db.query(
+    `SELECT id, name, description, price, original_price, quantity, category, wholesaler_id, wholesaler_name, status FROM products WHERE wholesaler_id = ?`,
+    [wholesalerId]
+  );
+  return rows;
+};
+
+// Update product details
+const updateProduct = async (id, { name, description, price, original_price, quantity, category }) => {
+  const [result] = await db.query(
+    `UPDATE products SET name = ?, description = ?, price = ?, original_price = ?, quantity = ?, category = ? WHERE id = ?`,
+    [
+      name,
+      description || null,
+      price,
+      original_price,
+      quantity || 1,
+      category,
+      id
+    ]
+  );
+  return result.affectedRows > 0;
+};
+
 module.exports = {
   getAllProducts,
   createProduct,
   deleteProduct,
-  updateProductStatus
+  updateProductStatus,
+  getProductsByWholesaler,
+  updateProduct
 };

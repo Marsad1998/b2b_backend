@@ -3,6 +3,7 @@ const path = require('path');
 
 const JSON_DB_PATH = path.join(__dirname, 'users.json');
 const PRODUCTS_DB_PATH = path.join(__dirname, 'products.json');
+const CATEGORIES_DB_PATH = path.join(__dirname, 'categories.json');
 
 // Pre-seed mock user data if file doesn't exist
 if (!fs.existsSync(JSON_DB_PATH)) {
@@ -52,12 +53,25 @@ const db = {
   query: async (sql, params) => {
     try {
       const queryNormalized = sql.trim().toLowerCase();
-      const isProductQuery = queryNormalized.includes('products');
-      const dbPath = isProductQuery ? PRODUCTS_DB_PATH : JSON_DB_PATH;
+      
+      let dbPath = JSON_DB_PATH;
+      let isProductQuery = false;
+      let isCategoryQuery = false;
 
-      // Ensure products file exists if it was deleted or first run
+      if (queryNormalized.includes('products')) {
+        dbPath = PRODUCTS_DB_PATH;
+        isProductQuery = true;
+      } else if (queryNormalized.includes('categories')) {
+        dbPath = CATEGORIES_DB_PATH;
+        isCategoryQuery = true;
+      }
+
+      // Ensure file exists
       if (isProductQuery && !fs.existsSync(PRODUCTS_DB_PATH)) {
         fs.writeFileSync(PRODUCTS_DB_PATH, JSON.stringify([], null, 2));
+      }
+      if (isCategoryQuery && !fs.existsSync(CATEGORIES_DB_PATH)) {
+        fs.writeFileSync(CATEGORIES_DB_PATH, JSON.stringify([], null, 2));
       }
 
       const data = fs.readFileSync(dbPath, 'utf8');
@@ -65,7 +79,14 @@ const db = {
 
       if (queryNormalized.startsWith('select')) {
         if (isProductQuery) {
-          // SELECT id, name, description, price, original_price, quantity, category, wholesaler_id, wholesaler_name, status FROM products
+          // Check if selecting wholesaler-specific catalog
+          if (queryNormalized.includes('wholesaler_id =') || queryNormalized.includes('wholesaler_id=')) {
+            const wholesalerId = params[0];
+            const matched = items.filter(p => p.wholesaler_id === parseInt(wholesalerId));
+            return [matched];
+          }
+          return [items];
+        } else if (isCategoryQuery) {
           return [items];
         } else {
           // Check if filtering by role and status (e.g. for pending approval list)
@@ -105,6 +126,21 @@ const db = {
           items.push(newProduct);
           fs.writeFileSync(dbPath, JSON.stringify(items, null, 2));
           return [{ insertId: newProduct.id }];
+        } else if (isCategoryQuery) {
+          // Example: INSERT INTO categories (name, description) VALUES (?, ?)
+          const [name, description] = params;
+          const existing = items.find(c => c.name.toLowerCase() === name.toLowerCase());
+          if (existing) {
+            throw new Error("Category already exists");
+          }
+          const newCategory = {
+            id: items.length > 0 ? Math.max(...items.map(c => c.id)) + 1 : 1,
+            name,
+            description: description || null
+          };
+          items.push(newCategory);
+          fs.writeFileSync(dbPath, JSON.stringify(items, null, 2));
+          return [{ insertId: newCategory.id }];
         } else {
           // Example: INSERT INTO users (name, phone, gender, email, password, role, status, license_no, business_address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
           const [name, phone, gender, email, password, role, status, license_no, business_address] = params;
@@ -128,11 +164,38 @@ const db = {
 
       if (queryNormalized.startsWith('update')) {
         if (isProductQuery) {
-          // Example: UPDATE products SET status = ? WHERE id = ?
-          const [status, id] = params;
-          const idx = items.findIndex(p => p.id === parseInt(id));
+          if (queryNormalized.includes('status =') || queryNormalized.includes('status=')) {
+            // Example: UPDATE products SET status = ? WHERE id = ?
+            const [status, id] = params;
+            const idx = items.findIndex(p => p.id === parseInt(id));
+            if (idx !== -1) {
+              items[idx].status = status;
+              fs.writeFileSync(dbPath, JSON.stringify(items, null, 2));
+              return [{ affectedRows: 1 }];
+            }
+          } else {
+            // Example: UPDATE products SET name = ?, description = ?, price = ?, original_price = ?, quantity = ?, category = ? WHERE id = ?
+            const [name, description, price, original_price, quantity, category, id] = params;
+            const idx = items.findIndex(p => p.id === parseInt(id));
+            if (idx !== -1) {
+              items[idx].name = name;
+              items[idx].description = description || null;
+              items[idx].price = Number(price);
+              items[idx].original_price = Number(original_price);
+              items[idx].quantity = Number(quantity || 1);
+              items[idx].category = category;
+              fs.writeFileSync(dbPath, JSON.stringify(items, null, 2));
+              return [{ affectedRows: 1 }];
+            }
+          }
+          return [{ affectedRows: 0 }];
+        } else if (isCategoryQuery) {
+          // Example: UPDATE categories SET name = ?, description = ? WHERE id = ?
+          const [name, description, id] = params;
+          const idx = items.findIndex(c => c.id === parseInt(id));
           if (idx !== -1) {
-            items[idx].status = status;
+            items[idx].name = name;
+            items[idx].description = description || null;
             fs.writeFileSync(dbPath, JSON.stringify(items, null, 2));
             return [{ affectedRows: 1 }];
           }
@@ -155,6 +218,12 @@ const db = {
           // Example: DELETE FROM products WHERE id = ?
           const id = params[0];
           const filtered = items.filter(p => p.id !== parseInt(id));
+          fs.writeFileSync(dbPath, JSON.stringify(filtered, null, 2));
+          return [{ affectedRows: 1 }];
+        } else if (isCategoryQuery) {
+          // Example: DELETE FROM categories WHERE id = ?
+          const id = params[0];
+          const filtered = items.filter(c => c.id !== parseInt(id));
           fs.writeFileSync(dbPath, JSON.stringify(filtered, null, 2));
           return [{ affectedRows: 1 }];
         }
